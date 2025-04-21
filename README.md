@@ -1,6 +1,6 @@
 # Workmake Task API
 
-A scalable service for executing heavy I/O bound background tasks written in Go.
+A scalable service for executing heavy I/O bound background tasks.
 
 ## Table of Contents
 
