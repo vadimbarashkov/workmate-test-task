@@ -21,8 +21,9 @@ type TaskManager struct {
 
 func New(ctx context.Context, executor executor.Executor, cleanupAfter time.Duration) *TaskManager {
 	tm := &TaskManager{
-		tasks:    make(map[string]*entity.Task),
-		executor: executor,
+		tasks:        make(map[string]*entity.Task),
+		executor:     executor,
+		cleanupAfter: cleanupAfter,
 	}
 	go tm.cleanup(ctx)
 	return tm

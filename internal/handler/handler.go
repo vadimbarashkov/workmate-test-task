@@ -29,7 +29,7 @@ func handleTestTask(ctx context.Context, task *entity.Task) {
 	select {
 	case <-ctx.Done():
 		task.SetStatus(entity.StatusCanceled)
-	case <-time.After(3 * time.Second): // simulate work (seconds -> minutes)
+	case <-time.After(15 * time.Second): // simulate work (seconds -> minutes)
 		task.SetStatus(entity.StatusCompleted)
 		task.SetResult([]byte(fmt.Sprintf("Payload: %s", task.Payload())))
 	}

@@ -16,19 +16,21 @@ const (
 )
 
 type Server struct {
-	Port           int           `yaml:"port" validate:"required,min=1,max=65535"`
-	ReadTimeout    time.Duration `yaml:"read_timeout" validate:"gt=0"`
-	WriteTimeout   time.Duration `yaml:"write_timeout" validate:"gt=0"`
-	IdleTimeout    time.Duration `yaml:"idle_timeout" validate:"gt=0"`
-	MaxHeaderBytes int           `yaml:"max_header_bytes" validate:"gte=0"`
+	Port            int           `yaml:"port" validate:"required,min=1,max=65535"`
+	ReadTimeout     time.Duration `yaml:"read_timeout" validate:"gt=0"`
+	WriteTimeout    time.Duration `yaml:"write_timeout" validate:"gt=0"`
+	IdleTimeout     time.Duration `yaml:"idle_timeout" validate:"gt=0"`
+	MaxHeaderBytes  int           `yaml:"max_header_bytes" validate:"gte=0"`
+	ShutdownTimeout time.Duration `yaml:"shutdown_timeout" validate:"gt=0"`
 }
 
 var defaultServer = Server{
-	Port:           8080,
-	ReadTimeout:    5 * time.Second,
-	WriteTimeout:   10 * time.Second,
-	IdleTimeout:    time.Minute,
-	MaxHeaderBytes: 1 << 20,
+	Port:            8080,
+	ReadTimeout:     5 * time.Second,
+	WriteTimeout:    10 * time.Second,
+	IdleTimeout:     time.Minute,
+	MaxHeaderBytes:  1 << 20,
+	ShutdownTimeout: 10 * time.Second,
 }
 
 func (s *Server) Addr() string {

@@ -6,13 +6,11 @@ import (
 	"flag"
 	"fmt"
 	"log/slog"
-	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
-	"time"
 
 	"github.com/vadimbarashkov/workmate-test-task/internal/api"
 	"github.com/vadimbarashkov/workmate-test-task/internal/config"
@@ -50,9 +48,6 @@ func main() {
 		WriteTimeout:   cfg.Server.WriteTimeout,
 		IdleTimeout:    cfg.Server.IdleTimeout,
 		MaxHeaderBytes: cfg.Server.MaxHeaderBytes,
-		BaseContext: func(_ net.Listener) context.Context {
-			return ctx
-		},
 	}
 
 	var wg sync.WaitGroup
@@ -68,22 +63,35 @@ func main() {
 		}
 	}()
 
+	<-ctx.Done()
+	exitCode := 0
+
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.Server.ShutdownTimeout)
+	defer cancel()
+
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		<-ctx.Done()
-
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-
 		if err := server.Shutdown(ctx); err != nil {
 			slog.Error("failed to shutdown server", slog.Any("err", err))
-			os.Exit(1)
+			exitCode = 1
+		}
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := executor.Shutdown(ctx); err != nil {
+			slog.Error("failed to shutdown executor", slog.Any("err", err))
+			exitCode = 1
 		}
 	}()
 
 	wg.Wait()
-	slog.Info("server stopped gracefully")
+	if exitCode == 1 {
+		slog.Info("server shutdown completed")
+	}
+	os.Exit(exitCode)
 }
 
 func setupLogger(env string) {
