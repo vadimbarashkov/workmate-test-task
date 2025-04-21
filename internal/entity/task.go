@@ -1,6 +1,10 @@
 package entity
 
-import "github.com/google/uuid"
+import (
+	"sync"
+
+	"github.com/google/uuid"
+)
 
 type TaskType int
 
@@ -42,18 +46,67 @@ func (s TaskStatus) String() string {
 }
 
 type Task struct {
-	ID      uuid.UUID
-	Type    TaskType
-	Status  TaskStatus
-	Payload []byte
-	Result  []byte
-	Error   error
+	id       uuid.UUID
+	taskType TaskType
+	status   TaskStatus
+	payload  []byte
+	result   []byte
+	error    error
+	mu       sync.RWMutex
 }
 
 func NewTask(taskType TaskType, payload []byte) *Task {
 	return &Task{
-		ID:     uuid.New(),
-		Type:   taskType,
-		Status: StatusPending,
+		id:       uuid.New(),
+		taskType: taskType,
+		status:   StatusPending,
 	}
+}
+
+func (t *Task) ID() uuid.UUID {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	return t.id
+}
+
+func (t *Task) TaskType() TaskType {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	return t.taskType
+}
+
+func (t *Task) Status() TaskStatus {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	return t.status
+}
+
+func (t *Task) SetStatus(status TaskStatus) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.status = status
+}
+
+func (t *Task) Payload() []byte {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	return t.payload
+}
+
+func (t *Task) Result() []byte {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	return t.result
+}
+
+func (t *Task) Error() error {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	return t.error
+}
+
+func (t *Task) SetError(err error) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.error = err
 }
