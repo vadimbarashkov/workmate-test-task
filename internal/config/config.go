@@ -36,13 +36,17 @@ func (s *Server) Addr() string {
 }
 
 type Config struct {
-	Env    string `yaml:"env" validate:"required,oneof=dev test prod"`
-	Server Server `yaml:"server" validate:"required"`
+	Env        string `yaml:"env" validate:"required,oneof=dev test prod"`
+	QueueSize  int    `yaml:"queue_size" validate:"gt=0"`
+	MaxWorkers int64  `yaml:"max_workers" validate:"gt=0"`
+	Server     Server `yaml:"server" validate:"required"`
 }
 
 var defaultConfig = Config{
-	Env:    EnvDev,
-	Server: defaultServer,
+	Env:        EnvDev,
+	QueueSize:  1000,
+	MaxWorkers: 100,
+	Server:     defaultServer,
 }
 
 var validate = validator.New()
