@@ -54,6 +54,7 @@ func (e *Executor) dispatch() {
 func (e *Executor) handleTask(ctx context.Context, task *entity.Task) {
 	switch task.TaskType() {
 	case entity.TypeTest:
+		task.SetStatus(entity.StatusRunning)
 		e.handleTestTask(ctx, task)
 	default:
 		task.SetStatus(entity.StatusFailed)
@@ -74,7 +75,6 @@ func (e *Executor) handleTestTask(ctx context.Context, task *entity.Task) {
 func (e *Executor) Execute(ctx context.Context, task *entity.Task) error {
 	select {
 	case e.queue <- taskWrapper{ctx: ctx, task: task}:
-		task.SetStatus(entity.StatusRunning)
 		return nil
 	default:
 		return executor.ErrQueueFull
