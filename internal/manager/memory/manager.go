@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/vadimbarashkov/workmate-test-task/internal/entity"
@@ -12,15 +13,42 @@ import (
 )
 
 type TaskManager struct {
-	tasks    map[string]*entity.Task
-	executor executor.Executor
-	mu       sync.RWMutex
+	tasks        map[string]*entity.Task
+	executor     executor.Executor
+	cleanupAfter time.Duration
+	mu           sync.RWMutex
 }
 
-func New(executor executor.Executor) *TaskManager {
-	return &TaskManager{
+func New(ctx context.Context, executor executor.Executor, cleanupAfter time.Duration) *TaskManager {
+	tm := &TaskManager{
 		tasks:    make(map[string]*entity.Task),
 		executor: executor,
+	}
+	go tm.cleanup(ctx)
+	return tm
+}
+
+func (m *TaskManager) cleanup(ctx context.Context) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(m.cleanupAfter):
+			var toDelete []string
+
+			m.mu.Lock()
+			for id, task := range m.tasks {
+				status := task.Status()
+				if status == entity.StatusCompleted || status == entity.StatusFailed || status == entity.StatusCanceled {
+					toDelete = append(toDelete, id)
+				}
+			}
+
+			for _, k := range toDelete {
+				delete(m.tasks, k)
+			}
+			m.mu.Unlock()
+		}
 	}
 }
 
@@ -49,5 +77,3 @@ func (m *TaskManager) Get(_ context.Context, taskID uuid.UUID) (*entity.Task, er
 
 	return task, nil
 }
-
-// TODO: periodically delete executed, failed or canceled tasks

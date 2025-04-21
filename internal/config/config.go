@@ -36,17 +36,19 @@ func (s *Server) Addr() string {
 }
 
 type Config struct {
-	Env        string `yaml:"env" validate:"required,oneof=dev test prod"`
-	QueueSize  int    `yaml:"queue_size" validate:"gt=0"`
-	MaxWorkers int64  `yaml:"max_workers" validate:"gt=0"`
-	Server     Server `yaml:"server" validate:"required"`
+	Env         string        `yaml:"env" validate:"required,oneof=dev test prod"`
+	TaskCleanup time.Duration `yaml:"task_cleanup" validate:"gt=0"`
+	QueueSize   int           `yaml:"queue_size" validate:"gt=0"`
+	MaxWorkers  int64         `yaml:"max_workers" validate:"gt=0"`
+	Server      Server        `yaml:"server" validate:"required"`
 }
 
 var defaultConfig = Config{
-	Env:        EnvDev,
-	QueueSize:  1000,
-	MaxWorkers: 100,
-	Server:     defaultServer,
+	Env:         EnvDev,
+	TaskCleanup: 30 * time.Minute,
+	QueueSize:   1000,
+	MaxWorkers:  100,
+	Server:      defaultServer,
 }
 
 var validate = validator.New()

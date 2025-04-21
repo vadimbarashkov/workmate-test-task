@@ -39,7 +39,7 @@ func main() {
 	defer stop()
 
 	executor := executor.New(cfg.QueueSize, cfg.MaxWorkers)
-	taskManager := manager.New(executor)
+	taskManager := manager.New(ctx, executor, cfg.TaskCleanup)
 
 	router := api.NewRouter(slog.Default(), taskManager)
 
