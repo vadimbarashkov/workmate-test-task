@@ -28,6 +28,7 @@ const (
 	StatusRunning
 	StatusCompleted
 	StatusFailed
+	StatusCanceled
 )
 
 func (s TaskStatus) String() string {
@@ -97,6 +98,12 @@ func (t *Task) Result() []byte {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
 	return t.result
+}
+
+func (t *Task) SetResult(result []byte) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.result = result
 }
 
 func (t *Task) Error() error {
