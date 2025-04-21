@@ -1,0 +1,137 @@
+openapi: 3.0.3
+info:
+  title: Workmate Task API
+  description: API for executing heavy I/O bound background tasks.
+  contact:
+    name: Vadim Barashkov
+    email: vadimdominik2005@gmail.com
+  license:
+    name: WTFPL
+    url: https://www.wtfpl.net
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+
+paths:
+  /healthz:
+    get:
+      summary: Health check
+      operationId: getHealthz
+      responses:
+        "200":
+          description: Service is up
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: ok
+
+  /tasks:
+    post:
+      summary: Create a new task
+      operationId: createTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTaskRequest"
+      responses:
+        "201":
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateTaskResponse"
+        "400":
+          description: Invalid request or task type
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /tasks/{task_id}:
+    get:
+      summary: Get task by ID
+      operationId: getTask
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Task found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetTaskResponse"
+        "400":
+          description: Invalid task ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Failed to retrieve task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    CreateTaskRequest:
+      type: object
+      required:
+        - task_type
+        - payload
+      properties:
+        task_type:
+          type: string
+          description: The type of the task
+        payload:
+          type: string
+          description: Payload of the task
+
+    CreateTaskResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the task
+
+    GetTaskResponse:
+      type: object
+      properties:
+        task_type:
+          type: string
+        status:
+          type: string
+        result:
+          type: string
+        error:
+          type: string
+          nullable: true
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string

@@ -5,6 +5,8 @@ BUILD_DIR := ./bin
 GOOS ?= $(shell go env GOOS)
 GOARCH ?= $(shell go env GOARCH)
 
+CONFIG_PATH ?= ./.config.yml
+
 .PHONY: all ci build run fmt vet lint test tidy clean help
 
 all: build ## Default target: Build the project.
@@ -18,7 +20,7 @@ build: ## Build the project binary.
 
 run: build ## Build and run the application.
 	@echo "Running the application..."
-	"${BUILD_DIR}/${APP_NAME}"
+	"${BUILD_DIR}/${APP_NAME}" -configPath="${CONFIG_PATH}"
 
 fmt: ## Format code using gofmt.
 	@echo "Formatting code..."
