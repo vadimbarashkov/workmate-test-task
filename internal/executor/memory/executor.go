@@ -2,11 +2,10 @@ package memory
 
 import (
 	"context"
-	"fmt"
-	"time"
 
 	"github.com/vadimbarashkov/workmate-test-task/internal/entity"
 	"github.com/vadimbarashkov/workmate-test-task/internal/executor"
+	"github.com/vadimbarashkov/workmate-test-task/internal/handler"
 	"golang.org/x/sync/semaphore"
 )
 
@@ -46,29 +45,8 @@ func (e *Executor) dispatch() {
 
 		go func(tw taskWrapper) {
 			defer e.sema.Release(1)
-			e.handleTask(tw.ctx, tw.task)
+			handler.HandleTask(tw.ctx, tw.task)
 		}(tw)
-	}
-}
-
-func (e *Executor) handleTask(ctx context.Context, task *entity.Task) {
-	switch task.TaskType() {
-	case entity.TypeTest:
-		task.SetStatus(entity.StatusRunning)
-		e.handleTestTask(ctx, task)
-	default:
-		task.SetStatus(entity.StatusFailed)
-		task.SetError(executor.ErrUnknownTaskType)
-	}
-}
-
-func (e *Executor) handleTestTask(ctx context.Context, task *entity.Task) {
-	select {
-	case <-ctx.Done():
-		task.SetStatus(entity.StatusCanceled)
-	case <-time.After(3 * time.Second): // simulate work (seconds -> minutes)
-		task.SetStatus(entity.StatusCompleted)
-		task.SetResult([]byte(fmt.Sprintf("Payload: %s", task.Payload())))
 	}
 }
 

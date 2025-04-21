@@ -8,8 +8,7 @@ import (
 )
 
 var (
-	ErrUnknownTaskType = errors.New("unknown task type")
-	ErrQueueFull       = errors.New("queue full")
+	ErrQueueFull = errors.New("queue full")
 )
 
 type Executor interface {
