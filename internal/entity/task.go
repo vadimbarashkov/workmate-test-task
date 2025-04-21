@@ -41,6 +41,8 @@ func (s TaskStatus) String() string {
 		return "completed"
 	case StatusFailed:
 		return "failed"
+	case StatusCanceled:
+		return "canceled"
 	default:
 		return "unknown"
 	}
@@ -61,6 +63,7 @@ func NewTask(taskType TaskType, payload []byte) *Task {
 		id:       uuid.New(),
 		taskType: taskType,
 		status:   StatusPending,
+		payload:  payload,
 	}
 }
 
