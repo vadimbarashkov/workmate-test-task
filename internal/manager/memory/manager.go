@@ -49,3 +49,5 @@ func (m *TaskManager) Get(_ context.Context, taskID uuid.UUID) (*entity.Task, er
 
 	return task, nil
 }
+
+// TODO: periodically delete executed, failed or canceled tasks

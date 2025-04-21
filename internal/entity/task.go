@@ -1,9 +1,15 @@
 package entity
 
 import (
+	"errors"
 	"sync"
 
 	"github.com/google/uuid"
+)
+
+var (
+	ErrInvalidTaskType = errors.New("invalid task type")
+	ErrMissingPayload  = errors.New("missing payload")
 )
 
 type TaskType int
@@ -11,6 +17,15 @@ type TaskType int
 const (
 	TypeTest TaskType = iota
 )
+
+func ParseTaskType(s string) (TaskType, error) {
+	switch s {
+	case "test":
+		return TypeTest, nil
+	default:
+		return 0, ErrInvalidTaskType
+	}
+}
 
 func (t TaskType) String() string {
 	switch t {

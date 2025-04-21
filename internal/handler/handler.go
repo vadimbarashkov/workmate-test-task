@@ -2,15 +2,10 @@ package handler
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
 	"github.com/vadimbarashkov/workmate-test-task/internal/entity"
-)
-
-var (
-	ErrUnknownTaskType = errors.New("unknown task type")
 )
 
 func HandleTask(ctx context.Context, task *entity.Task) {
@@ -20,11 +15,17 @@ func HandleTask(ctx context.Context, task *entity.Task) {
 		handleTestTask(ctx, task)
 	default:
 		task.SetStatus(entity.StatusFailed)
-		task.SetError(ErrUnknownTaskType)
+		task.SetError(entity.ErrInvalidTaskType)
 	}
 }
 
 func handleTestTask(ctx context.Context, task *entity.Task) {
+	if len(task.Payload()) == 0 {
+		task.SetStatus(entity.StatusFailed)
+		task.SetError(entity.ErrMissingPayload)
+		return
+	}
+
 	select {
 	case <-ctx.Done():
 		task.SetStatus(entity.StatusCanceled)
