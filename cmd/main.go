@@ -92,7 +92,7 @@ func main() {
 	}()
 
 	wg.Wait()
-	if exitCode == 1 {
+	if exitCode == 0 {
 		slog.Info("server shutdown completed")
 	}
 	os.Exit(exitCode)
